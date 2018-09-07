@@ -1,0 +1,15 @@
+{
+  "name": "order-price",
+  "version": "1.0.0",
+  "description": "Project to calcule customer order price including VAT",
+  "scripts": {
+    "test-init": "./node_modules/jasmine/bin/jasmine.js init",
+    "test": "./node_modules/jasmine/bin/jasmine.js",
+    "CalculateOrder": "node ./src/calculate-order.js"
+  },
+  "author": "Jancleidsson Soares",
+  "license": "MIT",
+  "devDependencies": {
+    "jasmine": "3.2.0"
+  }
+}
