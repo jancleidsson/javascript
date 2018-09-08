@@ -5,8 +5,8 @@ This file contains the steps required for running calculate order project.
 
 Precondition
 ====================
-
-The project have dependencies that require Node and NPM.
+ 
+The project have test dependencies that require Node and NPM.
 
 Environment setup - Windows x64
 ====================
