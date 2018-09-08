@@ -1,183 +1,186 @@
+ /*
+  * CalculateOrder 1.0.0
+  * Licensed under MIT, https://opensource.org/licenses/MIT
+  * @author Jancleidsson Soares <jancleidsson@gmail.com>
+  */
+
  /**
   * Loads the product order arguments and return a list with the product orders
   * @param {*} productOrdersArgs the given product order arguments
   */
-let loadOrderArgs = (productOrdersArgs) => {
-    if (productOrdersArgs.length % 2) throw new Error('Invalid number of arguments!');
-    let productOrders = new Array();
+ let loadOrderArgs = (productOrdersArgs) => {
+     if (productOrdersArgs.length % 2) throw new Error('Invalid number of arguments!');
+     let productOrders = new Array();
 
-    //Loading product orders
-    for (let index = 0; index < productOrdersArgs.length; index += 2) {
-        const quantity = productOrdersArgs[index + 1];
-        if (!parseInt(quantity)) throw new Error('Invalid product quantity argument type!');
+     //Loading product orders
+     for (let index = 0; index < productOrdersArgs.length; index += 2) {
+         const quantity = productOrdersArgs[index + 1];
+         if (!parseInt(quantity)) throw new Error('Invalid product quantity argument type!');
 
-        let order = {};
-        order.productId = productOrdersArgs[index];
-        order.quantity = parseInt(quantity);
+         let order = {};
+         order.productId = productOrdersArgs[index];
+         order.quantity = parseInt(quantity);
 
-        productOrders.push(order);
-    }
-    return productOrders;
-}
+         productOrders.push(order);
+     }
+     return productOrders;
+ }
 
-/**
- * Validates if the catalog file exists and reads its information 
- * @param {*} catalogPath catalog file path
- */
-let loadProductCatalogInfo = (catalogPath) => {
-    try {
-        if (!catalogPath) throw new Error('Catalog filePath is not defined!');
-        
-        const fs = require('fs');
-        const catalogData = fs.readFileSync(catalogPath, "utf8");
-        if (!catalogData) throw new Error('CSV File Empty');
+ /**
+  * Validates if the catalog file exists and reads its information 
+  * @param {*} catalogPath catalog file path
+  */
+ let loadProductCatalogInfo = (catalogPath) => {
+     try {
+         if (!catalogPath) throw new Error('Catalog filePath is not defined!');
 
-        //Parsing catalog data;
-        return parserCatalog(catalogData);
-    } catch (error) {
-        if (error.code === 'ENOENT') {
-            throw new Error('Catalog file not found - The file path must be absolute!');
-        } else {
-            throw error;
-        }
-    }
-}
+         const fs = require('fs');
+         const catalogData = fs.readFileSync(catalogPath, "utf8");
+         if (!catalogData) throw new Error('CSV File Empty');
 
-/**
- * Loads the catalog information, validates if each product information was written in the correct pattern and
- *  returns the list of products reletad to catalog info.
+         //Parsing catalog data;
+         return parserCatalog(catalogData);
+     } catch (error) {
+         if (error.code === 'ENOENT') {
+             throw new Error('Catalog file not found - The file path must be absolute!');
+         } else {
+             throw error;
+         }
+     }
+ }
 
- * In order to keep one product per id, the function will update the product prices according the last price founded
- *  and it will increase the stock amount.
- * @param {*} fileData catalog data information
- */
-let parserCatalog = (fileData) => {
-    // List of products in the catalog file
-    let products = new Array();
+ /**
+  * Loads the catalog information, validates if each product information was written in the correct pattern and
+  *  returns the list of products reletad to catalog info.
 
-    const productPattern = /^[a-z0-9]+(?:, ?[0-9]+)(?:, ?([0-9]*[.])?[0-9]+)$/gmi;
-    const productsData = fileData.split(/\r\n/);
-    productsData.forEach(productData => {
-        //Ignores empty lines in the productData
-        if (productData) {
-            if (!productData.match(productPattern)) throw new Error('Invalid catalog product information!');
+  * In order to keep one product per id, the function will update the product prices according the last price founded
+  *  and it will increase the stock amount.
+  * @param {*} fileData catalog data information
+  */
+ let parserCatalog = (fileData) => {
+     // List of products in the catalog file
+     let products = new Array();
 
-            const productItem = productData.split(',')
+     const productPattern = /^[a-z0-9]+(?:, ?[0-9]+)(?:, ?([0-9]*[.])?[0-9]+)$/gmi;
+     if (fileData) {
+         const productsData = fileData.split(/\r\n/);
+         productsData.forEach(productData => {
+             //Ignores empty lines in the productData
+             if (productData) {
+                 if (!productData.match(productPattern)) throw new Error('Invalid catalog product information!');
 
-            let product = {};
-            product.id = productItem[0];
-            product.stock = parseInt(productItem[1]);
-            product.price = parseFloat(productItem[2]);
+                 const productItem = productData.split(',')
 
-            let lastProductInfo = searchProduct(product.id, products);
-            if (lastProductInfo) {
-                //Updating product stock
-                product.stock = product.stock + lastProductInfo.stock;
+                 let product = {};
+                 product.id = productItem[0];
+                 product.stock = parseInt(productItem[1]);
+                 product.price = parseFloat(productItem[2]);
 
-                //Removing old element value;
-                removeProduct(lastProductInfo, products);
-            }
-            products.push(product);
-        }
-    });
-    return products;
-}
+                 let lastProductInfo = searchProduct(product.id, products);
+                 if (lastProductInfo) {
+                     //Updating product stock
+                     product.stock = product.stock + lastProductInfo.stock;
 
-/**
- * Searchs for a product in the list of products by a given id
- * @param {*} productId the given product id
- * @param {*} products product list used in the serach
- */
-let searchProduct = (productId, products) => {
-    return products.filter(product => {
-        return productId.toUpperCase() === product.id.toUpperCase();
-    })[0];
-}
+                     //Removing old element value;
+                     products.splice(products.indexOf(product), 1);
+                 }
+                 products.push(product);
+             }
+         });
+     }
+     return products;
+ }
 
-/**
- * Removes the given product from catalog of products
- * @param {*} product product to be removed
- * @param {*} products product list that stores the product
- */
-let removeProduct = (product, products) => {
-    products.splice(products.indexOf(product), 1);
-}
+ /**
+  * Searchs for a product in the list of products by a given id
+  * @param {*} productId the given product id
+  * @param {*} products product list used in the serach
+  */
+ let searchProduct = (productId, products) => {
+     return products.find((product) => {
+         return product.id.toUpperCase() === productId.toUpperCase();
+     });
+ }
 
-/**
- * Updates the given product in catalog of products
- * @param {*} product product to be updated
- * @param {*} products product list that stores the product
- */
-let updateProduct = (product, products) => {
-    const index = products.indexOf(product);
-    if (index !== -1) {
-        products[index] = product;
-    } else {
-        throw new Error('Product not found!');
-    }
-}
+ /**
+  * Updates the given product in catalog of products
+  * @param {*} product product to be updated
+  * @param {*} products product list that stores the product
+  */
+ let updateProduct = (product, newProduct, products) => {
+     const index = products.indexOf(product);
+     if (index !== -1) {
+         products[index] = newProduct;
+     } else {
+         throw new Error('Product not found!');
+     }
+ }
 
-/**
- * Processes the product orders and returns the total with the VAT
- */
-let processProductOrders = (products, productOrders, VAT) => {
-    let total = 0;
-    try {
-        for (let index = 0; index < productOrders.length; index++) {
-            const productOrder = productOrders[index];
-            const product = searchProduct(productOrder.productId, products);
-            if (!product) throw new Error('Product ' + productOrder.productId + ' not fount in catalog');
-            if (product.stock >= productOrder.quantity) {
+ /**
+  * Processes the product orders and returns the total with the VAT
+  */
+ let processProductOrders = (products, productOrders, VAT) => {
+     let total = 0;
+     try {
+         for (let index = 0; index < productOrders.length; index++) {
+             const productOrder = productOrders[index];
+             const product = searchProduct(productOrder.productId, products);
+             if (!product) throw new Error('Product ' + productOrder.productId + ' not fount in catalog');
+             if (product.stock >= productOrder.quantity) {
 
-                //Updatind product stock
-                product.stock = product.stock - productOrder.quantity;
-                updateProduct(product, products);
+                 //Updatind product stock            
+                 const newProduct = Object.assign(product, {stock: product.stock - productOrder.quantity});
+                 updateProduct(product, newProduct, products);
 
-                total = total + (productOrder.quantity * product.price);
-            } else {
-                let error = new Error('Product ' + productOrder.productId + ' without stock available!');
-                error.code = 1;
-                throw error;
-            }
-        }
-        return total + (VAT * total);
-    } catch (error) {
-        throw error;
-    }
-}
+                 total = total + (productOrder.quantity * product.price);
+             } else {
+                 let error = new Error('Product ' + productOrder.productId + ' without stock available!');
+                 error.code = 1;
+                 throw error;
+             }
+         }
+         return total + (VAT * total);
+     } catch (error) {
+         throw error;
+     }
+ }
 
-/**
- * Calculates the product orders order price including VAT
- * @param {*} catalogFilePathArg the product calatog file path
- * @param {*} productOrdersArgs the product orders arguments
- */
-let calculateOrder = (catalogFilePathArg, productOrdersArgs) => {
-    try {
-        console.log('Loading catalog file...');
-        let products = loadProductCatalogInfo(catalogFilePathArg);
+ /**
+  * Calculates the product orders order price including VAT
+  * @param {*} catalogFilePathArg the product calatog file path
+  * @param {*} productOrdersArgs the product orders arguments
+  */
+ let calculateOrder = (catalogFilePathArg, productOrdersArgs) => {
+     try {
+         console.log('Loading catalog file...');
+         let products = loadProductCatalogInfo(catalogFilePathArg);
 
-        console.log('Validating arguments...');
-        let productOrders = loadOrderArgs(productOrdersArgs);
+         console.log('Validating arguments...');
+         let productOrders = loadOrderArgs(productOrdersArgs);
 
-        // VAT percentage fixed at rate of 23%
-        const VAT = 0.23
+         // VAT percentage fixed at rate of 23%
+         const VAT = 0.23
 
-        console.log('Processing product orders...');
-        console.log('Total: ' + processProductOrders(products, productOrders, VAT));
-    } catch (error) {
-        console.log(error.message);
-        if (error.code) console.log('Error code: ' + error.code);
-    }
-}
+         console.log('Processing product orders...');
+         console.log('Total: ' + processProductOrders(products, productOrders, VAT));
+     } catch (error) {
+         console.log(error.message);
+         if (error.code) console.log('Error code: ' + error.code);
+     }
+ }
 
-/**
- * Exporting functions for tests
- */
-module.exports = {
-    loadOrderArgs: loadOrderArgs,
-    loadProductCatalogInfo: loadProductCatalogInfo,
-    processProductOrders: processProductOrders,
-    calculateOrder: calculateOrder
-}
+ /**
+  * Exporting functions for test purpose 
+  */
+ module.exports = {
+     loadOrderArgs: loadOrderArgs,
+     loadProductCatalogInfo: loadProductCatalogInfo,
+     processProductOrders: processProductOrders,
+     parserCatalog: parserCatalog,
+     calculateOrder: calculateOrder,
+     searchProduct: searchProduct,
+     updateProduct: updateProduct
+ }
 
-calculateOrder(process.argv[2], process.argv.slice(3));
+ //Main method execution for calculating product order price
+ calculateOrder(process.argv[2], process.argv.slice(3));
