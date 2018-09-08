@@ -8,7 +8,7 @@
   * Loads the product order arguments and return a list with the product orders
   * @param {*} productOrdersArgs the given product order arguments
   */
- let loadOrderArgs = (productOrdersArgs) => {
+ const loadOrderArgs = (productOrdersArgs) => {
      if (productOrdersArgs.length % 2) throw new Error('Invalid number of arguments!');
      let productOrders = new Array();
 
@@ -30,7 +30,7 @@
   * Validates if the catalog file exists and reads its information 
   * @param {*} catalogPath catalog file path
   */
- let loadProductCatalogInfo = (catalogPath) => {
+ const loadProductCatalogInfo = (catalogPath) => {
      try {
          if (!catalogPath) throw new Error('Catalog filePath is not defined!');
 
@@ -57,7 +57,7 @@
   *  and it will increase the stock amount.
   * @param {*} fileData catalog data information
   */
- let parserCatalog = (fileData) => {
+ const parserCatalog = (fileData) => {
      // List of products in the catalog file
      let products = new Array();
 
@@ -96,7 +96,7 @@
   * @param {*} productId the given product id
   * @param {*} products product list used in the serach
   */
- let searchProduct = (productId, products) => {
+ const searchProduct = (productId, products) => {
      return products.find((product) => {
          return product.id.toUpperCase() === productId.toUpperCase();
      });
@@ -107,7 +107,7 @@
   * @param {*} product product to be updated
   * @param {*} products product list that stores the product
   */
- let updateProduct = (product, newProduct, products) => {
+ const updateProduct = (product, newProduct, products) => {
      const index = products.indexOf(product);
      if (index !== -1) {
          products[index] = newProduct;
@@ -119,7 +119,7 @@
  /**
   * Processes the product orders and returns the total with the VAT
   */
- let processProductOrders = (products, productOrders, VAT) => {
+ const processProductOrders = (products, productOrders, VAT) => {
      let total = 0;
      try {
          for (let index = 0; index < productOrders.length; index++) {
@@ -150,7 +150,7 @@
   * @param {*} catalogFilePathArg the product calatog file path
   * @param {*} productOrdersArgs the product orders arguments
   */
- let calculateOrder = (catalogFilePathArg, productOrdersArgs) => {
+ const calculateOrder = (catalogFilePathArg, productOrdersArgs) => {
      try {
          console.log('Loading catalog file...');
          let products = loadProductCatalogInfo(catalogFilePathArg);

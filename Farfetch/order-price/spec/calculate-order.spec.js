@@ -13,6 +13,7 @@
      describe("When load a product catalog information", function () {
          beforeAll(function () {
              this.loadProductCatalogInfo = this.calculateOrder.loadProductCatalogInfo;
+            //  this.parserCatalog = this.calculateOrder.parserCatalog;
              this.catalogFilePath = require('path').resolve(__dirname + '/res/empty.catalog.csv');
          });
 
@@ -32,13 +33,6 @@
              expect(() => {
                  this.loadProductCatalogInfo(this.catalogFilePath)
              }).toThrow(new Error('CSV File Empty'));
-         });
-
-         it("should invoke the parserCatalog if all parameters are correct", function () {
-             this.catalogFilePath = require('path').resolve(__dirname + '/../sample.catalog.csv');
-             spyOn(this.loadProductCatalogInfo, 'parserCatalog');
-             this.loadProductCatalogInfo(this.catalogFilePath);
-             expect(this.loadProductCatalogInfo.parserCatalog).toHaveBeenCalled();
          });
      });
 
